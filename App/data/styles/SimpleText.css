@@ -1,0 +1,6 @@
+/*Separated from main for no big reason*/
+
+QLabel {
+    color: white;
+    /*font-size: 12px;*/
+}

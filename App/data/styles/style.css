@@ -1,0 +1,79 @@
+/* BUTTONS */
+
+QPushButton {
+    background-color: #141414;
+    color: white;
+    font-size: 16px;
+    font-family: Arial, serif;
+    padding: 7px;
+    font-weight: bold;
+    border-width: 2px;
+    border-radius: 1px;
+    border-style: solid;
+    border-color: #525252;
+    /*border: none;*/
+}
+
+QPushButton:hover {
+    background-color: #383838;
+    border-color: #525252;
+}
+
+QPushButton[feature_active=true] {
+    color: #6c62ff;
+    border-color: #2e4670;
+}
+
+/* TEXT */
+
+QLabel {
+    color: white;
+    /*font-size: 12px;*/
+}
+
+/* SPINBOX */
+
+QSpinBox {
+    background-color: black;
+    color: white;
+    /*border: 2px solid grey;*/
+    /*border-radius: 4px;*/
+    /*padding: 7px;*/
+}
+
+QTextEdit {
+    background-color: #383838;
+    color: white;
+    font-size: 16px;
+}
+
+QComboBox {
+    background-color: #141414;
+    color: white;
+    font-size: 16px;
+    font-family: Arial, serif;
+    padding: 2px;
+    border: 2px solid #525252;
+    border-radius: 1px;
+}
+QComboBox:hover {
+    background-color: #383838;
+    border-color: #525252;
+}
+QComboBox::backdrop {
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 25px;
+    border-left-width: 1px;
+    border-left-color: #525252;
+    border-left-style: solid;
+    border-top-right-radius: 1px;
+    border-bottom-right-radius: 1px;
+}
+QComboBox QAbstractItemView {
+    background-color: #141414;
+    color: white;
+    selection-background-color: #6c62ff;
+    selection-color: white;
+    border: 2px solid #525252;
+}

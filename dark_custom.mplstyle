@@ -1,0 +1,32 @@
+# Main stuff
+axes.facecolor: "#2B2B2B"
+figure.facecolor: "#2B2B2B"
+axes.edgecolor: "#CCCCCC"
+axes.labelcolor: "#CCCCCC"
+xtick.color: "#CCCCCC"
+ytick.color: "#CCCCCC"
+text.color: "#CCCCCC"
+
+# Grid
+axes.grid: True
+grid.color: "#444444"
+grid.linestyle: --
+grid.linewidth: 0.5
+
+# Lines
+lines.linewidth: 2
+lines.linestyle: -
+lines.color: "#1F78B4"
+
+# Fonts
+font.size: 12
+font.family: sans-serif
+
+# Titles
+axes.titlesize: 14
+axes.titlecolor: "#CCCCCC"
+
+# Legend
+legend.facecolor: "#3C3F41"
+legend.edgecolor: "#555555"
+legend.labelcolor: "#CCCCCC"
