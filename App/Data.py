@@ -8,6 +8,7 @@ class Data:
         self.renderWindowSize = size
         self.model = None
         self.plotWidget = None
+        self.lossWidget = None
         self.logWidget = None
         self.plotRangeWidget = None
         self.modelTypeWidget = None

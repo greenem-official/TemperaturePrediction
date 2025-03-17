@@ -38,6 +38,15 @@ class Model:
 
         self.X = None
         self.Y = None
+
+        # self.X_train = None
+        # self.X_test = None
+        # self.Y_train = None
+        # self.Y_test = None
+        # self.accuracy_predictions = None
+
+        self.loss_values = None
+
         self.look_back = None
         self.model = None
         self.predictions = None
@@ -96,7 +105,19 @@ class Model:
         return self
 
     def train_model(self, epochs):
-        self.model.fit(self.X, self.Y, epochs=epochs, batch_size=1, verbose=2)
+        # self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,
+        #                                                     self.Y,
+        #                                                     test_size=0.2,
+        #                                                     shuffle=True,
+        #                                                     # random_state=seed
+        #                                                     )
+
+        history = self.model.fit(self.X, self.Y, epochs=epochs, batch_size=1, verbose=2)
+
+        self.loss_values = history.history['loss']
+
+        # self.accuracy_predictions = self.model.predict(self.X_test)
+        # self.
 
     def predict_future(self, steps=12):
         result = []
@@ -177,3 +198,10 @@ class Model:
 
         # Прочее
         ax.legend()
+
+    def plotLoss(self, ax: Axes):
+        ax.plot(range(1, len(self.loss_values) + 1), self.loss_values, marker='o', linestyle='-')
+        # ax.title('')
+        ax.set_xlabel('Эпоха')
+        ax.set_ylabel('Значение потерь')
+        # ax.grid(True)

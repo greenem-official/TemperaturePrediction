@@ -46,4 +46,5 @@ color_map = {
     "debugCornerElement": QColor(f"#{__opacity}944dff"),
     "debugAdvancedNumberWidget": QColor(f"#{__opacity}ff4d4d"),
     "darkWidgetBg": QColor(20, 20, 20, 80),
+    "graphCombinedWidgetBg": QColor(f"#{__opacity}161616"),
 }

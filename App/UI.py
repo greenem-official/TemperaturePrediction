@@ -133,11 +133,12 @@ class AdvancedComboBoxWidget(DebuggableQWidget):
 
 
 class MatplotlibWidget(DebuggableQWidget):
-    def __init__(self, data: Data):
+    def __init__(self, data: Data, onCanvasDraw):
         super().__init__(data, 'debugAdvancedNumberWidget')
         # super().__init__(parent)
+        self.onCanvasDraw = onCanvasDraw
+
         self.data = data
-        self.data.plotWidget = self
 
         # Создаем фигуру и оси
         self.figure = Figure()
@@ -147,18 +148,18 @@ class MatplotlibWidget(DebuggableQWidget):
         self.canvas = FigureCanvas(self.figure)
 
         self.layout = QVBoxLayout()
+        self.layout.setContentsMargins(15, 0, 15, 0)
         self.setLayout(self.layout)
+
         self.layout.addWidget(self.canvas)
 
     def update_plot(self):
-        self.data.plotRangeWidget.update_sliders()
-
         # with plt.style.context('dark_background'):
         self.ax.clear()
         # self.ax.plot(x, y)
-        if self.data.model is not None:
-            self.data.model.plot(self.ax)
-            self.canvas.draw()
+        if self.onCanvasDraw is not None:
+            self.onCanvasDraw(self.ax)
+        self.canvas.draw()
 
 
 class LogWidget(DebuggableQWidget):
@@ -319,7 +320,9 @@ class ModelTrainingWidget(DebuggableQWidget):
         self.data.model = Model(self.data)
 
         worker = ThreadWorker(self.train_model)
-        worker.signals.finished.connect(lambda: ())
+        worker.signals.finished.connect(lambda: (
+            self.data.lossWidget.update_plot(),
+        ))
 
         self.data.threadPool.start(worker)
 
@@ -443,6 +446,11 @@ class HorizSpacer(QSpacerItem):
         super().__init__(width, 0, QSizePolicy.Policy.Maximum, QSizePolicy.Policy.Minimum)
 
 
+class VertSpacer(QSpacerItem):
+    def __init__(self, height):
+        super().__init__(0, height, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Maximum)
+
+
 class TopWidget(DebuggableQWidget):
     def __init__(self, data: Data):
         super().__init__(data, 'debugVbox')
@@ -480,7 +488,7 @@ class TopWidget(DebuggableQWidget):
         # modelChoiceWidget.setSizePolicy(QSizePolicy.Policy.Fixed, QSizePolicy.Policy.Expanding)
 
 
-class BottomWidget(DebuggableQWidget):
+class GraphRangeWidget(DebuggableQWidget):
     def __init__(self, data: Data):
         super().__init__(data, 'debugVbox')
         self.data = data
@@ -491,8 +499,86 @@ class BottomWidget(DebuggableQWidget):
 
         layout.addWidget(PlotRange(data))
 
-        # spacer = QSpacerItem(0, 0, QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Minimum)
-        # layout.addItem(spacer)
+
+class MainGraphWidget(DebuggableQWidget):
+    def __init__(self, data: Data):
+        super().__init__(data, 'debugVbox')
+        self.data = data
+
+        self.bgColor = color_map['graphCombinedWidgetBg']
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 10, 0, 0)
+        self.setLayout(layout)
+
+        mainPlotWidget = MatplotlibWidget(data, onCanvasDraw=self.onMainCanvasDraw)
+        mainPlotWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+
+        bottomWidget = GraphRangeWidget(data)
+        bottomWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+
+        title = QLabel('Значения')
+        title.setStyleSheet(getStyle(StyleType.SectionTitle))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        layout.addWidget(title)
+        layout.addWidget(mainPlotWidget)
+
+        layout.addItem(VertSpacer(10))
+
+        layout.addWidget(bottomWidget)
+
+        self.data.plotWidget = mainPlotWidget
+
+    def onMainCanvasDraw(self, ax):
+        if self.data.model is not None:
+            self.data.model.plot(ax)
+
+
+class LossGraphWidget(DebuggableQWidget):
+    def __init__(self, data: Data):
+        super().__init__(data, 'debugVbox')
+        self.data = data
+
+        self.bgColor = color_map['graphCombinedWidgetBg']
+
+        layout = QVBoxLayout()
+        layout.setContentsMargins(0, 10, 0, 0)
+        self.setLayout(layout)
+
+        lossGraph = MatplotlibWidget(data, onCanvasDraw=self.onLossCanvasDraw)
+
+        title = QLabel('Функция потерь')
+        title.setStyleSheet(getStyle(StyleType.SectionTitle))
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        layout.addWidget(title)
+
+        layout.addItem(VertSpacer(10))
+
+        layout.addWidget(lossGraph)
+
+        self.data.lossWidget = lossGraph
+
+    def onLossCanvasDraw(self, ax):
+        if self.data.model is not None:
+            self.data.model.plotLoss(ax)
+
+
+class CombinedBottomGraphsWidget(DebuggableQWidget):
+    def __init__(self, data: Data):
+        super().__init__(data, 'debugVbox')
+        self.data = data
+
+        layout = QHBoxLayout()
+        layout.setContentsMargins(0, 0, 0, 0)
+        self.setLayout(layout)
+
+        mainGraph = MainGraphWidget(data)
+        lossGraph = LossGraphWidget(data)
+
+        layout.addWidget(mainGraph, 3)
+        layout.addWidget(lossGraph, 1)
 
 
 class UIWidget(DebuggableQWidget):
@@ -512,30 +598,36 @@ class UIWidget(DebuggableQWidget):
         layout.addWidget(consoleTitle)
 
         logWidget = LogWidget(data)
-        plotWidget = MatplotlibWidget(data)
+        # mainPlotWidget = MatplotlibWidget(data, onCanvasDraw=self.onMainCanvasDraw)
+        # lossPlotWidget = MatplotlibWidget(data, onCanvasDraw=self.onLossCanvasDraw)
 
         topWidget = TopWidget(data)
-        bottomWidget = BottomWidget(data)
+        # bottomWidget = GraphRangeWidget(data)
 
         spacer = QSpacerItem(0, 0, QSizePolicy.Policy.Minimum, QSizePolicy.Policy.Expanding)
 
         logWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        plotWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
+        # mainPlotWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
         topWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
-        bottomWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
+        # bottomWidget.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Fixed)
 
         layout.addWidget(logWidget)
         layout.addWidget(topWidget)
 
         # layout.addItem(spacer)
-        layout.addWidget(plotWidget)
+        # layout.addWidget(mainPlotWidget)
+        #
+        # layout.addWidget(bottomWidget)
 
-        layout.addWidget(bottomWidget)
+        layout.addWidget(CombinedBottomGraphsWidget(data))
 
         self.redirect_output = RedirectOutput()
         self.redirect_output.text_written.connect(self.data.logWidget.append_text)
         sys.stdout = self.redirect_output
+
+        self.data.plotWidget.update_plot()
+        self.data.lossWidget.update_plot()
 
     def isPosInsideOfRect(self, pos: QPoint, rect: QRect):
         return rect.contains(pos)

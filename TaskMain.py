@@ -18,13 +18,13 @@ class MainWindow(QMainWindow):
         self.data = data
         self.data.threadPool = QThreadPool.globalInstance()
 
-        self.setWindowTitle("Task")
+        self.setWindowTitle("Предсказания температуры")
 
         # 410, 240
         screen_resolution = QGuiApplication.primaryScreen().geometry()
-        self.setGeometry(200,  # int((screen_resolution.width() - data.renderWindowSize[0]) / 2),
-                         100,  # int((screen_resolution.height() - data.renderWindowSize[1]) / 2),
-                         1200, # data.renderWindowSize[0],
+        self.setGeometry(80,  # int((screen_resolution.width() - data.renderWindowSize[0]) / 2),
+                         80,  # int((screen_resolution.height() - data.renderWindowSize[1]) / 2),
+                         1500, # data.renderWindowSize[0],
                          900 # data.renderWindowSize[1])
                          )
 
