@@ -548,6 +548,7 @@ class ModelSavesWidget(DebuggableQWidget):
 
     def on_save_button(self):
         if self.data.model is None or self.data.model.model is None:
+            print('Ошибка: сначала обучите модель!')
             return
 
         self.data.model.model.save('modelSave_model.keras')
@@ -563,8 +564,12 @@ class ModelSavesWidget(DebuggableQWidget):
         if self.data.model is None:
             self.data.model = Model(self.data)
 
-        self.data.model.model = load_model('modelSave_model.keras')
-        self.data.model.scaler = joblib.load('modelSave_scaler.joblib')
+        try:
+            self.data.model.model = load_model('modelSave_model.keras')
+            self.data.model.scaler = joblib.load('modelSave_scaler.joblib')
+        except ValueError:
+            print('Ошибка: сохранённый файл модели не найден!')
+            return
 
         if self.data.lossWidget is not None:
             self.data.lossWidget.update_plot()
