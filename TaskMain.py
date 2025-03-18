@@ -4,6 +4,7 @@ import threading
 from PyQt6.QtCore import Qt, QObject, pyqtSignal, QThreadPool
 from PyQt6.QtGui import QResizeEvent, QGuiApplication
 from PyQt6.QtWidgets import QApplication, QMainWindow
+from matplotlib import pyplot as plt
 
 from App.Canvas import Canvas
 from App.Data import Data
@@ -33,18 +34,9 @@ class MainWindow(QMainWindow):
 
         self.setFocusPolicy(Qt.FocusPolicy.StrongFocus)
 
-        # self.data.model = Model(data)
-        #
-        # thread = threading.Thread(target=lambda: (
-        #     self.data.model.load_data(),
-        #     self.data.model.scale_data(),
-        #     self.data.model.prepare_data(),
-        #     self.data.model.create_model(),
-        #     self.data.model.train_model(10),
-        #     self.data.model.predict(),
-        #     self.data.plotWidget.update_plot()
-        # ))
-        # thread.start()
+    def closeEvent(self, event):
+        plt.close('all')
+        event.accept()
 
     def resizeEvent(self, event: QResizeEvent):
         self.data.renderWindowSize = (event.size().width(), event.size().height())
@@ -55,11 +47,13 @@ def load_style(file_path):
         return file.read()
 
 
+# Главная функция
 if __name__ == "__main__":
     StylesManager.init()
     data = Data(size=(1000, 600))
     data.dataState = DataState()
 
+    # отдельное от stdout логирование
     # TestLogging.init_logger('log.txt')
 
     app = QApplication(sys.argv)
@@ -68,6 +62,6 @@ if __name__ == "__main__":
     window = MainWindow(data)
     window.show()
     try:
-        app.exec()
+        sys.exit(app.exec())
     except Exception as e:
         print(f"Exception: {e}")

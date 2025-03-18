@@ -3,6 +3,8 @@ import sys
 import os
 import threading
 
+from pandas import DataFrame
+
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 import joblib
@@ -352,8 +354,11 @@ class DataInputWidget(DebuggableQWidget):
 
         return df
 
-    def on_import_finished(self, df):
+    def on_import_finished(self, df: DataFrame):
         QTimer.singleShot(0, lambda: self.process_imported_data(df))
+
+        # Создано для удобства проверяющего, сам этот файл программой не считывается
+        df.to_csv('lastDatasetFormatted.csv', encoding='utf-8', index=False)
 
     def process_imported_data(self, df):
         self.data.dataState.importedData = df

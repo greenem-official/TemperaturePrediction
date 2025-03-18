@@ -18,9 +18,6 @@ class Canvas(QWidget):
         self.mainLayout.addWidget(ui)
         ui.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Expanding)
 
-    def update_physics(self):
-        pass
-
     def update_graphics(self):
         self.update()
 
