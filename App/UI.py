@@ -346,7 +346,7 @@ class DataInputWidget(DebuggableQWidget):
     def process_imported_data(self, df):
         self.data.dataState.importedData = df
 
-        print("Данные (по месяцам):")
+        print("Данные (вычисленно среднее по месяцам):")
         print(df)
 
         print("\nДанные успешно загружены\n")

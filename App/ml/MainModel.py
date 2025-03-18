@@ -163,7 +163,7 @@ class Model:
             ax.plot(
                 self.inputData['time'][actual_from:],  # [12 * 8:],
                 self.inputData['temperature'][actual_from:],  # [12 * 8:],
-                label='Фактические',
+                label='Исходные',
                 marker='o',
                 color='#1f77b4'
             )
@@ -199,7 +199,8 @@ class Model:
         ax.grid(True, which='major', linestyle='-', linewidth=1)
 
         # Отметки
-        ax.set_xticks(self.inputData['time'][actual_from:])
+        if self.data.graph_actual_data_visible:
+            ax.set_xticks(self.inputData['time'][actual_from:])
         ax.xaxis.set_minor_locator(mdates.MonthLocator())
 
         ax.xaxis.set_major_locator(mdates.MonthLocator(interval=12))
@@ -210,7 +211,7 @@ class Model:
 
         # Прочее
         if self.data.graph_actual_data_visible or self.data.graph_predicted_data_visible:
-            ax.legend()
+            ax.legend(loc='upper left')
 
     def plotLoss(self, ax: Axes):
         if self.data.lossYMaxDisplay is not None and self.data.lossYMaxDisplay > 0:
