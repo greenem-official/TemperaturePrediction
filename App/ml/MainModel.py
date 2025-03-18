@@ -13,13 +13,10 @@ from keras.src.optimizers import Adam
 from keras.src.layers import LSTM, Dense, GRU, SimpleRNN
 from keras import Sequential, Input
 from keras._tf_keras.keras.utils import set_random_seed
-# from keras._tf_keras.keras.utils import split_dataset
 
 from matplotlib import pyplot as plt, ticker
 from matplotlib.axes import Axes
 import matplotlib.dates as mdates
-
-from sklearn.model_selection import train_test_split
 
 from App.ml.util.Scalers import MinMaxScaler
 
@@ -112,7 +109,17 @@ class Model:
         #                                                     # random_state=seed
         #                                                     )
 
-        history = self.model.fit(self.X, self.Y, epochs=epochs, batch_size=1, verbose=2)
+        validation_split = self.data.validation_split
+        if validation_split is None:
+            validation_split = 0.2
+
+        history = self.model.fit(self.X,
+                                 self.Y,
+                                 epochs=epochs,
+                                 batch_size=1,
+                                 validation_split=validation_split,
+                                 verbose=2
+                                 )
 
         self.loss_values = history.history['loss']
 
@@ -151,29 +158,34 @@ class Model:
         # print(self.inputData['time'])
         # print([self.inputData['time'].iloc[-1], predictions_x[0]])
 
-        # Построение фактических данных
-        ax.plot(
-            self.inputData['time'][actual_from:],  # [12 * 8:],
-            self.inputData['temperature'][actual_from:],  # [12 * 8:],
-            label='Фактические',
-            marker='o'
-        )
+        if self.data.graph_actual_data_visible:
+            # Построение фактических данных
+            ax.plot(
+                self.inputData['time'][actual_from:],  # [12 * 8:],
+                self.inputData['temperature'][actual_from:],  # [12 * 8:],
+                label='Фактические',
+                marker='o',
+                color='#1f77b4'
+            )
 
-        # Линия между последним реальным и первым предсказанным значением
-        ax.plot(
-            [self.inputData['time'].iloc[-1], predictions_x[0]],
-            [self.inputData['temperature'].iloc[-1], self.predictions[0].item()],
-            color='gray',
-            linestyle='--'
-        )
+        if self.data.graph_actual_data_visible and self.data.graph_predicted_data_visible:
+            # Линия между последним реальным и первым предсказанным значением
+            ax.plot(
+                [self.inputData['time'].iloc[-1], predictions_x[0]],
+                [self.inputData['temperature'].iloc[-1], self.predictions[0].item()],
+                color='gray',
+                linestyle='--'
+            )
 
-        # Построение предсказанных данных
-        ax.plot(
-            predictions_x,
-            self.predictions,
-            label='Предсказанные',
-            marker='o'
-        )
+        if self.data.graph_predicted_data_visible:
+            # Построение предсказанных данных
+            ax.plot(
+                predictions_x,
+                self.predictions,
+                label='Предсказанные',
+                marker='o',
+                color='#ff7f0e'
+            )
 
         # Сетка
         ax.xaxis.set_major_locator(mdates.MonthLocator())
@@ -197,9 +209,13 @@ class Model:
         plt.setp(ax.get_xticklabels(), rotation=10, ha="right")
 
         # Прочее
-        ax.legend()
+        if self.data.graph_actual_data_visible or self.data.graph_predicted_data_visible:
+            ax.legend()
 
     def plotLoss(self, ax: Axes):
+        if self.data.lossYMaxDisplay is not None and self.data.lossYMaxDisplay > 0:
+            ax.set_ylim(top=self.data.lossYMaxDisplay * max(self.loss_values))
+
         ax.plot(range(1, len(self.loss_values) + 1), self.loss_values, marker='o', linestyle='-')
         # ax.title('')
         ax.set_xlabel('Эпоха')

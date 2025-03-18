@@ -14,3 +14,7 @@ class Data:
         self.modelTypeWidget = None
         self.dataState = None
         self.threadPool = None
+        self.validation_split = 0.2
+        self.lossYMaxDisplay = 1.0
+        self.graph_actual_data_visible = True
+        self.graph_predicted_data_visible = True

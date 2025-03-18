@@ -4,4 +4,3 @@ matplotlib
 pyqt6
 keras
 tensorflow
-scikit-learn
