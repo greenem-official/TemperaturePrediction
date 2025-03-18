@@ -3,6 +3,7 @@ import sys
 import os
 import threading
 
+import numpy as np
 from pandas import DataFrame
 
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
@@ -478,8 +479,26 @@ class ModelPredictionWidget(DebuggableQWidget):
         self.importButton = QPushButton('Предсказать')
         self.importButton.clicked.connect(self.onPredictButton)
 
+        self.saveResultsButton = QPushButton('Сохранить')
+        self.saveResultsButton.clicked.connect(self.onSaveResultsButton)
+
         layout.addWidget(self.monthsRangeWidget)
         layout.addWidget(self.importButton)
+        layout.addWidget(self.saveResultsButton)
+
+    def onSaveResultsButton(self):
+        if self.data.model is None or self.data.model.model is None:
+            print('Ошибка: не обучена модель!')
+            return
+        if self.data.dataState.importedData is None:
+            print('Ошибка: загрузите данные датасета!')
+            return
+        if self.data.model.predictions is None:
+            print('Ошибка: сначала нужно сгенерировать предсказанные данные')
+            return
+
+        predictions = self.data.model.predictions
+        np.savetxt('predictions.txt', predictions, delimiter='\n', fmt='%.3f')
 
     def onPredictButton(self):
         if self.data.model is None or self.data.model.model is None:

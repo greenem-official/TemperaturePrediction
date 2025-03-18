@@ -1,3 +1,4 @@
 .idea
 modelSave_model.keras
 modelSave_scaler.joblib
+predictions.txt
