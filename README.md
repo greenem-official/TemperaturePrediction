@@ -20,12 +20,12 @@
 
 Убедитесь, что установлены все зависимости из `requirements.txt`.
 
-При необходимости доступна видео-демонстрация
+При необходимости доступна видео-демонстрация (ниже)
 
 ## Видео-демонстрация
 
-[Видео-демонстрация (YouTube)](https://www.youtube.com/watch?v=0Q2fl09X-TQ)
-[Видео-демонстрация (Google Диск)](https://drive.google.com/file/d/1UwPAudY4WS1WrA7G9A_NhugPSoYVL4Jt/view?usp=sharing)
+[Видео-демонстрация (YouTube)](https://www.youtube.com/watch?v=0Q2fl09X-TQ)  
+[Видео-демонстрация (Google Диск)](https://drive.google.com/file/d/1UwPAudY4WS1WrA7G9A_NhugPSoYVL4Jt/view?usp=sharing)  
 
 ### Датасет
 
