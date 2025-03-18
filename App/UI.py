@@ -310,6 +310,7 @@ class DataInputWidget(DebuggableQWidget):
         super().__init__(data, 'debugCornerElement')
         self.data = data
         self.importWorker = None
+        self.format = None
 
         self.bgColor = color_map['darkWidgetBg']
 
@@ -322,27 +323,32 @@ class DataInputWidget(DebuggableQWidget):
         visualTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(visualTitle)
 
-        self.importButton = QPushButton('Импорт...')
-        self.importButton.clicked.connect(self.onImportButton)
+        self.importCsvButton = QPushButton('Импорт...')
+        self.importCsvButton.clicked.connect(self.onImportButton)
 
         layout.addItem(VertSpacer(20))
-        layout.addWidget(self.importButton)
+        layout.addWidget(self.importCsvButton)
 
         layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
     # Выполнение загрузки файла откреплено от главного потока
     def onImportButton(self):
         # print('Импорт данных...\n')
-        file_name = FileUtils.import_csv_file_name(self)
+        file_name = FileUtils.import_file_name(self)
         if file_name == '':
             return
 
-        self.importWorker = ThreadWorker(self.import_data, file_name)
-        self.importWorker.signals.finished.connect(self.on_import_finished)
+        if file_name.endswith('.csv'):
+            self.format = 'csv'
+            self.importWorker = ThreadWorker(self.import_csv_data, file_name)
+        elif file_name.endswith('.txt'):
+            self.format = 'txt'
+            self.importWorker = ThreadWorker(self.import_txt_data, file_name)
 
+        self.importWorker.signals.finished.connect(self.on_import_finished)
         self.data.threadPool.start(self.importWorker)
 
-    def import_data(self, file_name):
+    def import_csv_data(self, file_name):
         print("Загрузка файла...\n")
 
         df = pd.read_csv(file_name)
@@ -354,11 +360,27 @@ class DataInputWidget(DebuggableQWidget):
 
         return df
 
+    def import_txt_data(self, file_name):
+        print("Загрузка файла... Примечание: в TXT формате ожидаются данные уже по месяцам.")
+
+        with open(file_name, 'r') as file:
+            lines = file.readlines()
+
+        df = pd.DataFrame({'temperature': [float(line.strip()) for line in lines]})
+        df = df.reset_index()
+        df.columns = ['index', 'temperature']
+
+        # print(df)
+        return df
+
     def on_import_finished(self, df: DataFrame):
         QTimer.singleShot(0, lambda: self.process_imported_data(df))
 
         # Создано для удобства проверяющего, сам этот файл программой не считывается
-        df.to_csv('lastDatasetFormatted.csv', encoding='utf-8', index=False)
+        if self.format == 'csv':
+            df.to_csv('lastDatasetFormatted.csv', encoding='utf-8', index=False)
+        elif self.format == 'txt':
+            df['temperature'].to_csv('lastDatasetFormatted.txt', encoding='utf-8', index=False, header=False)
 
     def process_imported_data(self, df):
         self.data.dataState.importedData = df

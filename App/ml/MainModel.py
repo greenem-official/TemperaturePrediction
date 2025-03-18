@@ -153,11 +153,26 @@ class Model:
     def plot(self, ax: Axes):
         actual_from = self.data.plotRangeWidget.slider.getValue()
 
-        predictions_x = pd.date_range(
-            start=self.inputData['time'].iloc[-1] + pd.DateOffset(months=1),
-            periods=self.prediction_range,
-            freq='ME'
-        )
+        indexColumn = []
+        first_prediction_offset = 1
+
+        if 'time' in self.inputData:
+            indexColumn = self.inputData['time']
+
+            predictions_x = pd.date_range(
+                start=indexColumn.iloc[-1] + pd.DateOffset(months=1),
+                periods=self.prediction_range,
+                freq='ME'
+            )
+        elif 'index' in self.inputData:
+            indexColumn = self.inputData['index']
+
+            start_value = indexColumn.iloc[-1] + 1
+            predictions_x = np.arange(
+                start=start_value,
+                stop=start_value + self.prediction_range,
+                step=1
+            )
 
         # print(predictions_x)
         # print(self.inputData['time'])
@@ -166,7 +181,7 @@ class Model:
         if self.data.graph_actual_data_visible:
             # Построение фактических данных
             ax.plot(
-                self.inputData['time'][actual_from:],  # [12 * 8:],
+                indexColumn[actual_from:],  # [12 * 8:],
                 self.inputData['temperature'][actual_from:],  # [12 * 8:],
                 label='Исходные',
                 marker='o',
@@ -176,7 +191,7 @@ class Model:
         if self.data.graph_actual_data_visible and self.data.graph_predicted_data_visible:
             # Линия между последним реальным и первым предсказанным значением
             ax.plot(
-                [self.inputData['time'].iloc[-1], predictions_x[0]],
+                [indexColumn.iloc[-1], predictions_x[0]],
                 [self.inputData['temperature'].iloc[-1], self.predictions[0].item()],
                 color='gray',
                 linestyle='--'
@@ -193,9 +208,13 @@ class Model:
             )
 
         # Сетка
-        ax.xaxis.set_major_locator(mdates.MonthLocator())
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
-        ax.xaxis.set_minor_locator(mdates.MonthLocator())
+        if 'time' in self.inputData:
+            ax.xaxis.set_major_locator(mdates.MonthLocator())
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m'))
+            ax.xaxis.set_minor_locator(mdates.MonthLocator())
+        elif 'index' in self.inputData:
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(12))
+            ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
 
         ax.yaxis.set_major_locator(ticker.MultipleLocator(5))
         ax.yaxis.set_minor_locator(ticker.MultipleLocator(1))
@@ -205,11 +224,15 @@ class Model:
 
         # Отметки
         if self.data.graph_actual_data_visible:
-            ax.set_xticks(self.inputData['time'][actual_from:])
-        ax.xaxis.set_minor_locator(mdates.MonthLocator())
+            ax.set_xticks(indexColumn[actual_from:])
 
-        ax.xaxis.set_major_locator(mdates.MonthLocator(interval=12))
-        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        if 'time' in self.inputData:
+            ax.xaxis.set_minor_locator(mdates.MonthLocator())
+            ax.xaxis.set_major_locator(mdates.MonthLocator(interval=12))
+            ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y'))
+        elif 'index' in self.inputData:
+            ax.xaxis.set_major_locator(ticker.MultipleLocator(12))
+            ax.xaxis.set_minor_locator(ticker.MultipleLocator(1))
 
         # Поворот подписей
         plt.setp(ax.get_xticklabels(), rotation=10, ha="right")
