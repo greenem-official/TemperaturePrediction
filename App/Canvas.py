@@ -5,6 +5,9 @@ from App.Data import Data
 from App.UI import UIWidget
 
 class Canvas(QWidget):
+    """
+    Класс главного центрального виджета, который делает заливку фона и держит на себе остальные виджеты
+    """
     def __init__(self, data: Data):
         super().__init__()
         self.data = data

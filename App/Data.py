@@ -1,6 +1,7 @@
-from PyQt6.QtGui import QPainter
-
 class Data:
+    """
+    Класс, содержащий все общие данные и хранящий состояния.
+    """
     debug = False
     renderWindowSize: tuple[int, int] = None
 

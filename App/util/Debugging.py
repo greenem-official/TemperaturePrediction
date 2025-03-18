@@ -3,6 +3,9 @@ from PyQt6.QtWidgets import QWidget
 
 
 class DebuggableQWidget(QWidget):
+    """
+    Собственная обёртка поверх PyQt виджета для более качественной настройки
+    """
     bgColor = None
 
     def __init__(self, data, colorName):

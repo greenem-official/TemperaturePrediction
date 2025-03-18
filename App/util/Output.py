@@ -5,6 +5,9 @@ from PyQt6.QtCore import QObject, pyqtSignal
 
 
 class RedirectOutput(QObject):
+    """
+    Класс для перенаправления консольного вывода
+    """
     text_written = pyqtSignal(str)
 
     def __init__(self):

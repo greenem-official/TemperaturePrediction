@@ -10,6 +10,9 @@ from App.util import FileUtils, StylesManager
 
 
 class MainWindow(QMainWindow):
+    """
+    Класс окна для конвертера формата .csv в .txt
+    """
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Конвертирование форматов")

@@ -1,5 +1,9 @@
 file = None
 
+"""
+Временное решение для логирования без использования STDOUT
+"""
+
 def init_logger(filename):
     global file
     file = open(filename, 'a')

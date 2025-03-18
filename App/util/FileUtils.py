@@ -1,5 +1,8 @@
 from PyQt6.QtWidgets import QFileDialog, QWidget
 
+"""
+Утилиты диалоговых окон импорта файлов
+"""
 
 def import_file_name(widget: QWidget):
     file_name, _ = QFileDialog.getOpenFileName(widget, 'Выберите CSV или TXT файл', '', 'CSV Files (*.csv);;TXT Files (*.txt)')

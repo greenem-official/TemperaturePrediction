@@ -1,5 +1,8 @@
 from enum import Enum
 
+"""
+Файл для загруки CSS стилей приложения
+"""
 
 def load_style(file_path):
     with open(file_path, 'r') as file:

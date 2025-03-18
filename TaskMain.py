@@ -14,6 +14,9 @@ from App.ml.MainModel import Model
 
 
 class MainWindow(QMainWindow):
+    """
+    Класс окна для основного приложения
+    """
     def __init__(self, data: Data):
         super().__init__()
         self.data = data
@@ -47,7 +50,9 @@ def load_style(file_path):
         return file.read()
 
 
-# Главная функция
+"""
+Главная функция
+"""
 if __name__ == "__main__":
     StylesManager.init()
     data = Data(size=(1000, 600))

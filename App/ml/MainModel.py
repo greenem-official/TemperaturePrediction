@@ -25,7 +25,12 @@ set_random_seed(seed)
 np.random.seed(seed)
 random.seed(seed)
 
+
 class Model:
+    """
+    Основной класс модели, который использует функционал Keras.
+    В функциях этого класса подготавливаются данные, создаётся модель, делаются предсказания и рисуются основной и график потерь.
+    """
     def __init__(self, data: Data):
         self.data = data
 

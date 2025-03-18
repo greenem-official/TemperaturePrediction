@@ -33,6 +33,9 @@ from App.util.StylesManager import StyleType, getStyle
 from App.util.Debugging import color_map, DebuggableQWidget
 from App.ml.MainModel import Model
 
+"""
+Файл с классами для виджетов PyQt
+"""
 
 class AdvancedCheckboxWidget(DebuggableQWidget):
     def __init__(self, data: Data, name, default, onValueChange=None):

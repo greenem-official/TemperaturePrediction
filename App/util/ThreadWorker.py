@@ -6,6 +6,9 @@ class WorkerSignals(QObject):
 
 
 class ThreadWorker(QRunnable):
+    """
+    Собственная обёртка вокруг QRunnable для асинхронного выполнения задач
+    """
     def __init__(self, runFunc, *args):
         super().__init__()
         self.runFunc = runFunc
