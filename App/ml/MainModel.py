@@ -142,6 +142,11 @@ class Model:
         self.predictions = self.scaler.inverse_transform(np.array(result).reshape(-1, 1)) # Возвращение в исходный масштаб
 
     def predict(self, months=12):
+        if self.data.dataState.importedData is not None and self.Y is None:
+            self.load_data()
+            self.scale_data()
+            self.prepare_data()
+
         self.prediction_range = months
         self.predict_future(steps=self.prediction_range)
 
@@ -214,6 +219,9 @@ class Model:
             ax.legend(loc='upper left')
 
     def plotLoss(self, ax: Axes):
+        if self.loss_values is None:
+            return
+
         if self.data.lossYMaxDisplay is not None and self.data.lossYMaxDisplay > 0:
             ax.set_ylim(top=self.data.lossYMaxDisplay * max(self.loss_values))
 

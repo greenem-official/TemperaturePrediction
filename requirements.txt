@@ -4,3 +4,4 @@ matplotlib
 pyqt6
 keras
 tensorflow
+joblib

@@ -1,11 +1,17 @@
+import pickle
 import sys
+import os
 import threading
 
+os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+
+import joblib
 import pandas as pd
 from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QVBoxLayout, QPushButton, QLabel, QSlider, QHBoxLayout, QSpacerItem, \
     QSizePolicy, QSpinBox, QTextEdit, QWidget, QLineEdit, QComboBox, QCheckBox
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, QTimer
+from keras.src.saving import load_model
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -290,7 +296,11 @@ class ModelChoiceWidget(DebuggableQWidget):
 
         self.modelType = AdvancedComboBoxWidget(data=data, name='Тип модели', options=('LSTM', 'GRU', 'SimpleRNN'), default=0,
                                                       onValueChange=None)
+
+        # layout.addItem(VertSpacer(10))
         layout.addWidget(self.modelType)
+
+        layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
 
 class DataInputWidget(DebuggableQWidget):
@@ -313,8 +323,10 @@ class DataInputWidget(DebuggableQWidget):
         self.importButton = QPushButton('Импорт...')
         self.importButton.clicked.connect(self.onImportButton)
 
-        # layout.addWidget(QLabel('Датасет'))
+        layout.addItem(VertSpacer(20))
         layout.addWidget(self.importButton)
+
+        layout.setAlignment(Qt.AlignmentFlag.AlignVCenter)
 
     # Выполнение загрузки файла откреплено от главного потока
     def onImportButton(self):
@@ -384,6 +396,8 @@ class ModelTrainingWidget(DebuggableQWidget):
         layout.addWidget(self.validationSplitWidget)
         layout.addWidget(self.trainButton)
 
+        self.setMaximumWidth(300)
+
     def scale_validation_value(self, value):
         return value / 20
 
@@ -402,6 +416,7 @@ class ModelTrainingWidget(DebuggableQWidget):
 
     def train_model(self):
         if self.data.dataState.importedData is None:
+            print('Ошибка: не импортированы данные датасета!')
             return
 
         print('Обучение...\n')
@@ -441,6 +456,10 @@ class ModelPredictionWidget(DebuggableQWidget):
 
     def onPredictButton(self):
         if self.data.model is None or self.data.model.model is None:
+            print('Ошибка: не обучена модель!')
+            return
+        if self.data.dataState.importedData is None:
+            print('Ошибка: загрузите данные датасета для предсказания!')
             return
 
         print('Предсказание значений...\n')
@@ -482,10 +501,29 @@ class ModelSavesWidget(DebuggableQWidget):
         layout.addWidget(self.load_button)
 
     def on_save_button(self):
-        pass
+        if self.data.model is None or self.data.model.model is None:
+            return
+
+        self.data.model.model.save('modelSave_model.keras')
+        joblib.dump(self.data.model.scaler, 'modelSave_scaler.joblib')
+
+        # with open('scalerSave.pkl', 'wb') as f:
+        #     pickle.dump(self.data.model.scaler, f)
+
+        print('Модель успешно сохранена.\n')
+
 
     def on_load_button(self):
-        pass
+        if self.data.model is None:
+            self.data.model = Model(self.data)
+
+        self.data.model.model = load_model('modelSave_model.keras')
+        self.data.model.scaler = joblib.load('modelSave_scaler.joblib')
+
+        if self.data.lossWidget is not None:
+            self.data.lossWidget.update_plot()
+
+        print('Модель успешно загружена.\nГрафик потерь доступен только после обучения и не сохраняется.\nЗагрузка даёт предсказывать новые значения с указанным датасетом.\n')
 
 
 class PlotRange(DebuggableQWidget):
