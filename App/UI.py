@@ -380,7 +380,7 @@ class ModelTrainingWidget(DebuggableQWidget):
         visualTitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
         layout.addWidget(visualTitle)
 
-        self.epochsWidget = AdvancedSpinboxWidget(data=data, name='Эпохи', range=(0, 10000), default=10,
+        self.epochsWidget = AdvancedSpinboxWidget(data=data, name='Эпохи', range=(0, 10000), default=100,
                                                   onValueChange=None
                                                   )
         self.validationSplitWidget = AdvancedSliderWidget(data=data, name='Доля валидации', range=(0, 20), default=4,
@@ -682,6 +682,18 @@ class LossGraphWidget(DebuggableQWidget):
 
         self.lossGraph = MatplotlibWidget(data, onCanvasDraw=self.onLossCanvasDraw, subplotsAdjust=({'left': 0.35, 'bottom': 0.2}))
 
+        self.lossXSlider = AdvancedSliderWidget(data=data, name='X min', range=(0, 100), default=0,
+                                                onValueChange=self.on_loss_x_value_change,
+                                                displayValueFunc=self.scale_loss_value,
+                                                verticalSlider=False
+                                                )
+
+        self.lossYSlider = AdvancedSliderWidget(data=data, name='Y max', range=(1, 100), default=100,
+                                                onValueChange=self.on_loss_y_value_change,
+                                                displayValueFunc=self.scale_loss_value,
+                                                verticalSlider=True
+                                                )
+
         title = QLabel('Функция потерь')
         title.setStyleSheet(getStyle(StyleType.SectionTitle))
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -692,13 +704,9 @@ class LossGraphWidget(DebuggableQWidget):
 
         rightLayout.addWidget(self.lossGraph)
 
-        self.lossYWidget = AdvancedSliderWidget(data=data, name='Y', range=(0, 100), default=100,
-                                                onValueChange=self.on_loss_value_change,
-                                                displayValueFunc=self.scale_loss_value,
-                                                verticalSlider=True
-                                                )
+        rightLayout.addWidget(self.lossXSlider)
 
-        layout.addWidget(self.lossYWidget)
+        layout.addWidget(self.lossYSlider)
         layout.addLayout(rightLayout)
 
         self.data.lossWidget = self.lossGraph
@@ -710,8 +718,12 @@ class LossGraphWidget(DebuggableQWidget):
     def scale_loss_value(self, value):
         return value / 100
 
-    def on_loss_value_change(self):
-        self.data.lossYMaxDisplay = self.lossYWidget.getScaledValue()
+    def on_loss_y_value_change(self):
+        self.data.lossYMaxDisplay = self.lossYSlider.getScaledValue()
+        self.lossGraph.update_plot()
+
+    def on_loss_x_value_change(self):
+        self.data.lossXMinDisplay = self.lossXSlider.getScaledValue()
         self.lossGraph.update_plot()
 
 class CombinedBottomGraphsWidget(DebuggableQWidget):
@@ -726,8 +738,8 @@ class CombinedBottomGraphsWidget(DebuggableQWidget):
         mainGraph = MainGraphWidget(data)
         lossGraph = LossGraphWidget(data)
 
-        layout.addWidget(mainGraph, 3)
-        layout.addWidget(lossGraph, 1)
+        layout.addWidget(mainGraph, 6)
+        layout.addWidget(lossGraph, 3)
 
 
 class UIWidget(DebuggableQWidget):

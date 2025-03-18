@@ -223,7 +223,11 @@ class Model:
             return
 
         if self.data.lossYMaxDisplay is not None and self.data.lossYMaxDisplay > 0:
-            ax.set_ylim(top=self.data.lossYMaxDisplay * max(self.loss_values))
+            # Если нужен масштаб не до 0, то раскомментировать bottom
+            ax.set_ylim(top=self.data.lossYMaxDisplay * max(self.loss_values)) #, bottom=min(self.loss_values))
+
+        if self.data.lossXMinDisplay is not None:
+            ax.set_xlim(left=self.data.lossXMinDisplay * len(self.loss_values), right=len(self.loss_values))
 
         ax.plot(range(1, len(self.loss_values) + 1), self.loss_values, marker='o', linestyle='-')
         # ax.title('')

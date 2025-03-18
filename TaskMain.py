@@ -24,7 +24,7 @@ class MainWindow(QMainWindow):
         screen_resolution = QGuiApplication.primaryScreen().geometry()
         self.setGeometry(80,  # int((screen_resolution.width() - data.renderWindowSize[0]) / 2),
                          80,  # int((screen_resolution.height() - data.renderWindowSize[1]) / 2),
-                         1500, # data.renderWindowSize[0],
+                         1700, # data.renderWindowSize[0],
                          900 # data.renderWindowSize[1])
                          )
 
