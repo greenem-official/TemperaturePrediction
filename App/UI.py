@@ -6,7 +6,7 @@ import threading
 import numpy as np
 from pandas import DataFrame
 
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
+from App.ml import MainModel
 
 import joblib
 import pandas as pd
@@ -14,7 +14,6 @@ from PyQt6.QtGui import QMouseEvent
 from PyQt6.QtWidgets import QVBoxLayout, QPushButton, QLabel, QSlider, QHBoxLayout, QSpacerItem, \
     QSizePolicy, QSpinBox, QTextEdit, QWidget, QLineEdit, QComboBox, QCheckBox
 from PyQt6.QtCore import Qt, QPoint, QRect, QSize, QTimer
-from keras.src.saving import load_model
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib.pyplot as plt
@@ -568,7 +567,7 @@ class ModelSavesWidget(DebuggableQWidget):
             self.data.model = Model(self.data)
 
         try:
-            self.data.model.model = load_model('modelSave_model.keras')
+            self.data.model.model = MainModel.load_model_from_save('modelSave_model.keras')
             self.data.model.scaler = joblib.load('modelSave_scaler.joblib')
         except ValueError:
             print('Ошибка: сохранённый файл модели не найден!')

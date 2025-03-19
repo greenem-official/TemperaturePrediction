@@ -9,10 +9,17 @@ os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1'
 import numpy as np
 import pandas as pd
 
-from keras.src.optimizers import Adam
-from keras.src.layers import LSTM, Dense, GRU, SimpleRNN
-from keras import Sequential, Input
-from keras._tf_keras.keras.utils import set_random_seed
+# from keras.src.optimizers import Adam
+# from keras.src.layers import LSTM, Dense, GRU, SimpleRNN
+# from keras import Sequential, Input
+# from keras._tf_keras.keras.utils import set_random_seed
+# from keras.src.saving import load_model
+
+from keras.api.optimizers import Adam
+from keras.api.layers import LSTM, Dense, GRU, SimpleRNN
+from keras.api import Sequential, Input
+from keras.api.utils import set_random_seed
+from keras.api.saving import load_model
 
 from matplotlib import pyplot as plt, ticker
 from matplotlib.axes import Axes
@@ -26,12 +33,23 @@ np.random.seed(seed)
 random.seed(seed)
 
 
+"""
+Функция из Keras, специально вынесенная в этот файл для того, чтобы не импортировать Keras в неподходящих местах
+и не ставить дополнительных переменных окружения. Это также позволяет упростить поиск проблем с Tensorflow.
+"""
+def load_model_from_save(file_name):
+    load_model(file_name)
+
 class Model:
     """
     Основной класс модели, который использует функционал Keras.
     В функциях этого класса подготавливаются данные, создаётся модель, делаются предсказания и рисуются основной и график потерь.
     """
     def __init__(self, data: Data):
+        """
+        Инициализация
+        :param data: Переменная общей информации
+        """
         self.data = data
 
         self.inputData = None
@@ -55,16 +73,27 @@ class Model:
         self.prediction_range = 0
 
     def load_data(self):
+        """
+        Функция загрузки в объект модели информации о последнем загруженном пользователем датасете
+        """
         # import os
         # current_directory = os.getcwd()
         # self.inputData = pd.read_csv(current_directory + os.sep + 'monthlyMeteoData.csv', parse_dates=['time'], index_col='time')
         self.inputData = self.data.dataState.importedData  # Может быть сценарий, где это ещё не инициализировано
 
     def scale_data(self):
+        """
+        Функция масштабирования данных перед использованием
+        """
         self.scaler = MinMaxScaler()
         self.scaled_data = self.scaler.fit_transform(self.inputData[['temperature']])  # можно поменять на номер
 
     def __prepare_data(self, data, look_back=12):
+        """
+        Функция подготовки X и Y numpy массивов, созданных из единого столбца температур
+        Y становится просто температурами, а X - массивом предыдущих температур длиной look_back, идущих перед конкретным y.
+        Графический интерфейс не предоставляет возможности менять значение look_back.
+        """
         self.X, self.Y = [], []
         self.look_back = look_back
         if isinstance(data, pd.DataFrame):
@@ -80,11 +109,18 @@ class Model:
         self.Y = np.array(self.Y)
 
     def prepare_data(self):
+        """
+        Функция подготовки X и Y numpy массивов для обучения модели и предсказания значений
+        """
         look_back = 12
         self.__prepare_data(self.scaled_data, look_back)
         self.X = np.reshape(self.X, (self.X.shape[0], self.X.shape[1], 1))
 
     def create_model(self, modelType=None):
+        """
+        Инициализация внутреннего аттрибута model, хранящего настроенный объект Keras модели
+        :param modelType: Тип модели в формате строки
+        """
         requestedType = modelType
         if requestedType is None:
             requestedType = self.data.modelTypeWidget.modelType.getValue()
@@ -107,6 +143,11 @@ class Model:
         return self
 
     def train_model(self, epochs):
+        """
+        Обучение модели на X и y с указанным в слайдере validation_split
+        :param epochs: Количество эпох обучения. Чем больше эпох, тем лучше предсказания. Оценить оптимальное значение помогает график потерь.
+        """
+
         # self.X_train, self.X_test, self.Y_train, self.Y_test = train_test_split(self.X,
         #                                                     self.Y,
         #                                                     test_size=0.2,
@@ -132,6 +173,10 @@ class Model:
         # self.
 
     def predict_future(self, steps=12):
+        """
+        Функция предсказания массива длиной steps следующих значений, идущих после данных в загруженном датасете
+        :param steps: Количество предсказываемых значений
+        """
         result = []
 
         prev_values = self.Y[-self.look_back:].reshape(-1)  # 12 последних значений, поначалу только исходных
@@ -147,6 +192,10 @@ class Model:
         self.predictions = self.scaler.inverse_transform(np.array(result).reshape(-1, 1)) # Возвращение в исходный масштаб
 
     def predict(self, months=12):
+        """
+        Функция предсказания значений
+        :param months: Количество месяцев для предсказания (по умолчанию 12)
+        """
         if self.data.dataState.importedData is not None and self.Y is None:
             self.load_data()
             self.scale_data()
@@ -156,10 +205,13 @@ class Model:
         self.predict_future(steps=self.prediction_range)
 
     def plot(self, ax: Axes):
+        """
+        Функция рисования основного графика с исходными и/или предсказанными данными
+        :param ax: Объект Axes, на котором функции позволяется рисовать
+        """
         actual_from = self.data.plotRangeWidget.slider.getValue()
 
         indexColumn = []
-        first_prediction_offset = 1
 
         if 'time' in self.inputData:
             indexColumn = self.inputData['time']
@@ -247,6 +299,10 @@ class Model:
             ax.legend(loc='upper left')
 
     def plotLoss(self, ax: Axes):
+        """
+        Функция рисования графика функции потерь, т.е. зависимости точности модели от количества эпох
+        :param ax: Объект Axes, на котором функции позволяется рисовать
+        """
         if self.loss_values is None:
             return
 
